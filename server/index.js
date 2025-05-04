@@ -13,9 +13,25 @@ const io     = new Server(server, {
   cors: { origin: process.env.CLIENT_URL || '*' }
 });
 global._io = io;
+const allowedOrigins = (process.env.CLIENT_URL || '')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+
 
 /* ────────────────────────  MIDDLEWARE  ──────────────────────── */
-app.use(cors());
+
+app.use(
+  cors({
+    origin(origin, cb) {
+      // allow Postman / mobile apps with no Origin header
+      if (!origin || allowedOrigins.includes(origin)) {
+        return cb(null, true);
+      }
+      return cb(new Error('Not allowed by CORS'));
+    }
+  })
+);
 app.use(express.json());
 
 /* ────────────────────────  DATABASE  ────────────────────────── */
