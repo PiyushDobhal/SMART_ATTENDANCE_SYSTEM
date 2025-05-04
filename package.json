@@ -1,0 +1,8 @@
+{
+  "name": "smart_attendance_system",
+  "private": true,
+  "scripts": {
+    "render-build": "cd client && npm ci && npm run build && cd ../server && npm ci",
+    "render-start": "cd server && npm start"
+  }
+}

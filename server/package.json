@@ -1,4 +1,15 @@
 {
+  "name": "smart-attendance-server",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": "18.x"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "postinstall": "npm rebuild canvas"   
+  },
   "dependencies": {
     "@tensorflow/tfjs": "^4.22.0",
     "@tensorflow/tfjs-backend-cpu": "^4.22.0",
@@ -11,12 +22,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.2",
     "node-fetch": "^3.3.2",
-    "path": "^0.12.7",
     "socket.io": "^4.8.1"
-  },
-  "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
