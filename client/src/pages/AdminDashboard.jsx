@@ -148,24 +148,24 @@ export default function AdminDashboard({ socket }) {
       </div>
 
       {/* ────── controls row ───────────────────────────────────────────── */}
-      <div className="flex items-center mb-4 flex-nowrap overflow-hidden">
-        {/* heading – never wraps, will truncate if it runs out of room */}
-        <h2 className="text-lg font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
+      <div className="flex items-center mb-4 overflow-x-auto">
+        {/* heading – fixed white‑space so it never breaks */}
+        <h2 className="text-lg font-semibold whitespace-nowrap mr-4">
           Registered&nbsp;Students
         </h2>
 
-        {/* buttons – pushed to the far right, no wrapping */}
-        <div className="flex gap-2 ml-auto flex-shrink-0">
+        {/* push everything else to the extreme right */}
+        <div className="ml-auto flex-shrink-0 flex gap-2">
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
           >
             {showForm ? "Cancel" : "Add Student"}
           </button>
 
           <button
             onClick={downloadCSV}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-sm"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
           >
             Download&nbsp;CSV
           </button>
