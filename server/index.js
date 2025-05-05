@@ -1,4 +1,4 @@
-/* server/index.js -------------------------------------------------------- */
+/* server/index.js  */
 require('dotenv').config();
 const path       = require('path');
 const express    = require('express');
@@ -10,52 +10,44 @@ const { Server } = require('socket.io');
 const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, {
-  cors: { origin: process.env.CLIENT_URL || '*' }
+  cors: { origin: true }              // Socket.IO → reflect caller’s origin
 });
 global._io = io;
+
+/* ───────────────  CORS (REST endpoints)  ──────────────── */
 const allowedOrigins = (process.env.CLIENT_URL || '')
   .split(',')
-  .map(o => o.trim())
-  .filter(Boolean);
-
-
-/* ────────────────────────  MIDDLEWARE  ──────────────────────── */
+  .map(o => o.trim());
 
 app.use(
   cors({
-    origin(origin, cb) {
-      // allow Postman / mobile apps with no Origin header
-      if (!origin || allowedOrigins.includes(origin)) {
-        return cb(null, true);
-      }
-      return cb(new Error('Not allowed by CORS'));
-    }
+    origin: allowedOrigins,   // <-- array of strings
+    credentials: true,        // only if you ever send cookies
   })
 );
+
 app.use(express.json());
 
-/* ────────────────────────  DATABASE  ────────────────────────── */
+/* ───────────────  DATABASE  ─────────────── */
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB Error', err));
 
-/* ────────────────────────  ROUTES  ──────────────────────────── */
+/* ───────────────  API ROUTES  ───────────── */
 app.use('/api/admin',    require('./routes/adminRoutes'));
 app.use('/api/students', require('./routes/studentRoutes'));
 app.use('/api/face',     require('./routes/faceRoutes'));
 
-/* ────────────────────────  STATIC BUILD  ───────────────────────
-   Vite build copies files to  server/public/
-   (see client/vite.config.js -> outDir = ../server/public)       */
+/* ───────────────  STATIC REACT BUILD  ────── */
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath));
 
-/* All non‑API routes → React’s index.html */
+/* Single‑page‑app fallback (after static): */
 app.get(/^(?!\/api).*/, (_, res) =>
   res.sendFile(path.join(publicPath, 'index.html'))
 );
 
-/* ────────────────────────  START  ───────────────────────────── */
+/* ───────────────  START  ─────────────────── */
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on ${PORT}`));
