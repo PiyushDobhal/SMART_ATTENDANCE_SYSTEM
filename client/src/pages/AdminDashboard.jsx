@@ -1,6 +1,6 @@
 // client/src/pages/AdminDashboard.jsx
-import React, { useEffect, useState, useRef } from 'react';
-import api from '../api';
+import React, { useEffect, useState, useRef } from "react";
+import api from "../api";
 import {
   PieChart,
   Pie,
@@ -8,16 +8,16 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from 'recharts';
-import { toast } from 'react-toastify';
+} from "recharts";
+import { toast } from "react-toastify";
 
-const COLORS = ['#00C49F', '#FF8042'];
+const COLORS = ["#00C49F", "#FF8042"];
 
 export default function AdminDashboard({ socket }) {
   const [stats, setStats] = useState({ present: 0, absent: 0 });
   const [students, setStudents] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [newStudent, setNewStudent] = useState({ name: '', sapId: '' });
+  const [newStudent, setNewStudent] = useState({ name: "", sapId: "" });
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [individualStats, setIndividualStats] = useState(null);
   const attendanceRef = useRef(null);
@@ -25,56 +25,58 @@ export default function AdminDashboard({ socket }) {
   // Scroll into view when individualStats changes
   useEffect(() => {
     if (individualStats && attendanceRef.current) {
-      attendanceRef.current.scrollIntoView({ behavior: 'smooth' });
+      attendanceRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [individualStats]);
 
   // fetch overall summary and students
   const fetchSummary = async () => {
     try {
-      const res = await api.get('/api/admin/attendance');
+      const res = await api.get("/api/admin/attendance");
       setStats(res.data.stats);
       const sorted = res.data.students.sort((a, b) =>
-        (a.name || '').localeCompare(b.name || '')
+        (a.name || "").localeCompare(b.name || "")
       );
       setStudents(sorted);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to load summary');
+      toast.error(err.response?.data?.message || "Failed to load summary");
     }
   };
 
   useEffect(() => {
     fetchSummary();
     if (socket) {
-      socket.on('attendance-updated', fetchSummary);
-      return () => socket.off('attendance-updated', fetchSummary);
+      socket.on("attendance-updated", fetchSummary);
+      return () => socket.off("attendance-updated", fetchSummary);
     }
   }, [socket]);
 
   // view individual student summary
   const handleView = async (stu) => {
     try {
-      const res = await api.get(`/api/admin/students/${stu._id}/attendance-summary`);
+      const res = await api.get(
+        `/api/admin/students/${stu._id}/attendance-summary`
+      );
       setIndividualStats(res.data);
       setSelectedStudent(stu);
     } catch {
-      toast.error('Failed to fetch student summary');
+      toast.error("Failed to fetch student summary");
     }
   };
 
   // delete student
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this student?')) return;
+    if (!window.confirm("Delete this student?")) return;
     try {
       await api.delete(`/api/admin/students/${id}`);
-      toast.success('Student deleted');
+      toast.success("Student deleted");
       if (selectedStudent && selectedStudent._id === id) {
         setSelectedStudent(null);
         setIndividualStats(null);
       }
       fetchSummary();
     } catch {
-      toast.error('Delete failed');
+      toast.error("Delete failed");
     }
   };
 
@@ -82,35 +84,40 @@ export default function AdminDashboard({ socket }) {
   const handleAdd = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/api/admin/students', newStudent);
-      toast.success('Student added');
+      await api.post("/api/admin/students", newStudent);
+      toast.success("Student added");
       setShowForm(false);
-      setNewStudent({ name: '', sapId: '' });
+      setNewStudent({ name: "", sapId: "" });
       fetchSummary();
     } catch {
-      toast.error('Add failed');
+      toast.error("Add failed");
     }
   };
 
   // download CSV
   const downloadCSV = () => {
-    if (!students.length) return toast.info('No students to download');
-    const header = ['S.NO', 'Name', 'SAP ID', 'Email'];
-    const rows = students.map((s, idx) => [idx + 1, s.name || '', s.sapId || '', s.email]);
-    const csv = [header, ...rows].map(r => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    if (!students.length) return toast.info("No students to download");
+    const header = ["S.NO", "Name", "SAP ID", "Email"];
+    const rows = students.map((s, idx) => [
+      idx + 1,
+      s.name || "",
+      s.sapId || "",
+      s.email,
+    ]);
+    const csv = [header, ...rows].map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.setAttribute('download', 'students.csv');
+    link.setAttribute("download", "students.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   const pieData = [
-    { name: 'Present', value: stats.present },
-    { name: 'Absent',  value: stats.absent  },
+    { name: "Present", value: stats.present },
+    { name: "Absent", value: stats.absent },
   ];
 
   return (
@@ -141,40 +148,45 @@ export default function AdminDashboard({ socket }) {
       </div>
 
       {/* ────── controls row ───────────────────────────────────────────── */}
-<div className="flex items-center mb-4 flex-wrap">
-  {/* heading keeps to one line */}
-  <h2 className="text-lg font-semibold whitespace-nowrap">
-    Registered&nbsp;Students
-  </h2>
+      <div className="flex items-center mb-4 flex-nowrap overflow-hidden">
+        {/* heading – never wraps, will truncate if it runs out of room */}
+        <h2 className="text-lg font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
+          Registered&nbsp;Students
+        </h2>
 
-  {/* buttons live in a flex container that hugs the right edge */}
-  <div className="flex gap-2 ml-auto mt-2 sm:mt-0">
-    <button
-      onClick={() => setShowForm(v => !v)}
-      className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
-    >
-      {showForm ? 'Cancel' : 'Add Student'}
-    </button>
+        {/* buttons – pushed to the far right, no wrapping */}
+        <div className="flex gap-2 ml-auto flex-shrink-0">
+          <button
+            onClick={() => setShowForm((v) => !v)}
+            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+          >
+            {showForm ? "Cancel" : "Add Student"}
+          </button>
 
-    <button
-      onClick={downloadCSV}
-      className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded"
-    >
-      Download&nbsp;CSV
-    </button>
-  </div>
-</div>
-{/* ────── /controls row ──────────────────────────────────────────── */}
+          <button
+            onClick={downloadCSV}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-sm"
+          >
+            Download&nbsp;CSV
+          </button>
+        </div>
+      </div>
+      {/* ────── /controls row ──────────────────────────────────────────── */}
 
       {/* add form */}
       {showForm && (
-        <form onSubmit={handleAdd} className="bg-gray-800 p-4 rounded mb-6 space-y-4">
+        <form
+          onSubmit={handleAdd}
+          className="bg-gray-800 p-4 rounded mb-6 space-y-4"
+        >
           <div>
             <label className="block mb-1">Name</label>
             <input
               type="text"
               value={newStudent.name}
-              onChange={e => setNewStudent({ ...newStudent, name: e.target.value })}
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, name: e.target.value })
+              }
               required
               className="w-full p-2 bg-gray-700 rounded"
             />
@@ -184,12 +196,19 @@ export default function AdminDashboard({ socket }) {
             <input
               type="text"
               value={newStudent.sapId}
-              onChange={e => setNewStudent({ ...newStudent, sapId: e.target.value })}
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, sapId: e.target.value })
+              }
               required
               className="w-full p-2 bg-gray-700 rounded"
             />
           </div>
-          <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Create Student</button>
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          >
+            Create Student
+          </button>
         </form>
       )}
 
@@ -209,14 +228,24 @@ export default function AdminDashboard({ socket }) {
           {students.map((stu, idx) => (
             <tr key={stu._id} className="border-b border-gray-700">
               <td className="py-2 px-4 text-left">{idx + 1}</td>
-              <td className="py-2 px-4 text-left">{stu.name || '–'}</td>
-              <td className="py-2 px-4 text-left">{stu.sapId || '–'}</td>
+              <td className="py-2 px-4 text-left">{stu.name || "–"}</td>
+              <td className="py-2 px-4 text-left">{stu.sapId || "–"}</td>
               <td className="py-2 px-4 text-left">{stu.email}</td>
               <td className="py-2 px-4 text-left">
-                <button onClick={() => handleDelete(stu._id)} className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-sm">Delete</button>
+                <button
+                  onClick={() => handleDelete(stu._id)}
+                  className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-sm"
+                >
+                  Delete
+                </button>
               </td>
               <td className="py-2 px-4 text-left">
-                <button onClick={() => handleView(stu)} className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-sm">View</button>
+                <button
+                  onClick={() => handleView(stu)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-sm"
+                >
+                  View
+                </button>
               </td>
             </tr>
           ))}
@@ -226,14 +255,16 @@ export default function AdminDashboard({ socket }) {
       {/* individual piecard */}
       {selectedStudent && individualStats && (
         <div ref={attendanceRef} className="mt-8 bg-gray-800 p-6 rounded">
-          <h3 className="text-xl mb-4">{selectedStudent.name || selectedStudent.email}’s Attendance</h3>
+          <h3 className="text-xl mb-4">
+            {selectedStudent.name || selectedStudent.email}’s Attendance
+          </h3>
           <div className="w-full h-48">
             <ResponsiveContainer>
               <PieChart>
                 <Pie
                   data={[
-                    { name: 'Present', value: individualStats.present },
-                    { name: 'Absent', value: individualStats.absent },
+                    { name: "Present", value: individualStats.present },
+                    { name: "Absent", value: individualStats.absent },
                   ]}
                   dataKey="value"
                   nameKey="name"
