@@ -148,14 +148,14 @@ export default function AdminDashboard({ socket }) {
       </div>
 
       {/* ────── controls row ───────────────────────────────────────────── */}
-      <div className="flex items-center mb-4 overflow-x-auto">
-        {/* heading – fixed white‑space so it never breaks */}
-        <h2 className="text-lg font-semibold whitespace-nowrap mr-4">
+      <div className="flex flex-wrap items-center justify-between mb-4">
+        {/* Heading - doesn't wrap */}
+        <h2 className="text-lg font-semibold whitespace-nowrap mr-4 mb-2 sm:mb-0">
           Registered&nbsp;Students
         </h2>
 
-        {/* push everything else to the extreme right */}
-        <div className="ml-auto flex-shrink-0 flex gap-2">
+        {/* Button container */}
+        <div className="flex gap-2 flex-wrap sm:flex-nowrap">
           <button
             onClick={() => setShowForm((v) => !v)}
             className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
@@ -171,6 +171,7 @@ export default function AdminDashboard({ socket }) {
           </button>
         </div>
       </div>
+
       {/* ────── /controls row ──────────────────────────────────────────── */}
 
       {/* add form */}
