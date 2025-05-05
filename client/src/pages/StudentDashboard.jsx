@@ -83,7 +83,7 @@ const StudentDashboard = ({ socket }) => {
   ];
 
   return (
-    <div className="p-6 pt-20">
+    <div className="p-6 pt-30">
       {/* Face Registration Prompt */}
       {needsFaceRegister && (
         <div className="mb-6">

@@ -140,24 +140,31 @@ export default function AdminDashboard({ socket }) {
         </ResponsiveContainer>
       </div>
 
-      {/* controls */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Registered Students</h2>
-        <div className="space-x-2">
-          <button
-            onClick={() => setShowForm(v => !v)}
-            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
-          >
-            {showForm ? 'Cancel' : 'Add Student'}
-          </button>
-          <button
-            onClick={downloadCSV}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded"
-          >
-            Download CSV
-          </button>
-        </div>
-      </div>
+      {/* ────── controls row ───────────────────────────────────────────── */}
+<div className="flex items-center mb-4 flex-wrap">
+  {/* heading keeps to one line */}
+  <h2 className="text-lg font-semibold whitespace-nowrap">
+    Registered&nbsp;Students
+  </h2>
+
+  {/* buttons live in a flex container that hugs the right edge */}
+  <div className="flex gap-2 ml-auto mt-2 sm:mt-0">
+    <button
+      onClick={() => setShowForm(v => !v)}
+      className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
+    >
+      {showForm ? 'Cancel' : 'Add Student'}
+    </button>
+
+    <button
+      onClick={downloadCSV}
+      className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded"
+    >
+      Download&nbsp;CSV
+    </button>
+  </div>
+</div>
+{/* ────── /controls row ──────────────────────────────────────────── */}
 
       {/* add form */}
       {showForm && (
