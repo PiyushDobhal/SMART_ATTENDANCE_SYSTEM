@@ -146,30 +146,32 @@ export default function AdminDashboard({ socket }) {
           </PieChart>
         </ResponsiveContainer>
       </div>
-      {/* ───────── controls row ───────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
-        {/* Heading (never wraps) */}
+      {/* ────── controls row ───────────────────────────────────────────── */}
+      <div className="flex items-center justify-between mb-4">
+        {/* heading – never wraps */}
         <h2 className="text-lg font-semibold whitespace-nowrap">
-          Registered Students
+          Registered&nbsp;Students
         </h2>
 
-        {/* Buttons – stay on one line from ≥ 640 px, wrap otherwise  */}
-        <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:ml-auto">
+        {/* buttons */}
+        <div className="flex flex-nowrap gap-2 overflow-x-auto sm:overflow-visible sm:ml-auto">
           {/* add / cancel */}
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
+            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded
+                 text-xs sm:text-sm whitespace-nowrap"
           >
             {showForm ? "Cancel" : "Add Student"}
           </button>
 
-          {/* Toggle enrol‑mode */}
+          {/* enrol toggle */}
           <button
             onClick={async () => {
               const { data } = await api.post("/api/enrol/toggle");
               toast.info(`Enroll mode ${data.enrolEnabled ? "ON" : "OFF"}`);
             }}
-            className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
+            className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded
+                 text-xs sm:text-sm whitespace-nowrap"
           >
             Fingerprint Enroll
           </button>
@@ -177,13 +179,14 @@ export default function AdminDashboard({ socket }) {
           {/* CSV */}
           <button
             onClick={downloadCSV}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded
+                 text-xs sm:text-sm whitespace-nowrap"
           >
             Download CSV
           </button>
         </div>
       </div>
-      {/* ───────── /controls row ──────────────────────────── */}
+      {/* ────── /controls row ──────────────────────────────────────────── */}
 
       {/* add form */}
       {showForm && (
