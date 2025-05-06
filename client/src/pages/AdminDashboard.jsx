@@ -147,19 +147,20 @@ export default function AdminDashboard({ socket }) {
         </ResponsiveContainer>
       </div>
       {/* ────── controls row ───────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-4">
-        {/* heading – never wraps */}
+      <div
+        className="mb-4 grid grid-cols-[auto_1fr_auto] items-center gap-2"
+      >
+        {/* left‑hand heading                                                     */}
         <h2 className="text-lg font-semibold whitespace-nowrap">
           Registered&nbsp;Students
         </h2>
-
-        {/* buttons */}
-        <div className="flex flex-nowrap gap-2 overflow-x-auto sm:overflow-visible sm:ml-auto">
+        {/* right‑hand button group                                               */}
+        <div className="flex gap-2 flex-nowrap ml-auto">
           {/* add / cancel */}
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded
-                 text-xs sm:text-sm whitespace-nowrap"
+            className="bg-green-600 hover:bg-green-700 text-white
+                 px-3 py-1 rounded text-xs sm:text-sm whitespace-nowrap"
           >
             {showForm ? "Cancel" : "Add Student"}
           </button>
@@ -170,8 +171,8 @@ export default function AdminDashboard({ socket }) {
               const { data } = await api.post("/api/enrol/toggle");
               toast.info(`Enroll mode ${data.enrolEnabled ? "ON" : "OFF"}`);
             }}
-            className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded
-                 text-xs sm:text-sm whitespace-nowrap"
+            className="bg-yellow-600 hover:bg-yellow-700 text-white
+                 px-3 py-1 rounded text-xs sm:text-sm whitespace-nowrap"
           >
             Fingerprint Enroll
           </button>
@@ -179,8 +180,8 @@ export default function AdminDashboard({ socket }) {
           {/* CSV */}
           <button
             onClick={downloadCSV}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded
-                 text-xs sm:text-sm whitespace-nowrap"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white
+                 px-3 py-1 rounded text-xs sm:text-sm whitespace-nowrap"
           >
             Download CSV
           </button>
