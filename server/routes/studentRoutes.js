@@ -1,7 +1,6 @@
-// server/routes/studentRoutes.js
 const express = require("express");
-const router  = express.Router();
-const auth    = require("../middleware/auth");
+const router = express.Router();
+const auth = require("../middleware/auth");
 const {
   studentLogin,
   uploadFace,
@@ -10,7 +9,7 @@ const {
   markAttendance,
   getProfile,
   updateProfile,
-  registerFingerprint   // ← make sure this is exported from your controller
+  registerFingerprint,
 } = require("../controllers/studentController");
 
 // Public: login only

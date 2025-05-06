@@ -146,33 +146,44 @@ export default function AdminDashboard({ socket }) {
           </PieChart>
         </ResponsiveContainer>
       </div>
-
-      {/* ────── controls row ───────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center justify-between mb-4">
-        {/* Heading - doesn't wrap */}
-        <h2 className="text-lg font-semibold whitespace-nowrap mr-4 mb-2 sm:mb-0">
-          Registered&nbsp;Students
+      {/* ───────── controls row ───────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+        {/* Heading (never wraps) */}
+        <h2 className="text-lg font-semibold whitespace-nowrap">
+          Registered Students
         </h2>
 
-        {/* Button container */}
-        <div className="flex gap-2 flex-wrap sm:flex-nowrap">
+        {/* Buttons – stay on one line from ≥ 640 px, wrap otherwise  */}
+        <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:ml-auto">
+          {/* add / cancel */}
           <button
             onClick={() => setShowForm((v) => !v)}
             className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
           >
-            {showForm ? "Cancel" : "Add Student"}
+            {showForm ? "Cancel" : "Add Student"}
           </button>
 
+          {/* Toggle enrol‑mode */}
+          <button
+            onClick={async () => {
+              const { data } = await api.post("/api/enrol/toggle");
+              toast.info(`Enroll mode ${data.enrolEnabled ? "ON" : "OFF"}`);
+            }}
+            className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
+          >
+            Fingerprint Enroll
+          </button>
+
+          {/* CSV */}
           <button
             onClick={downloadCSV}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
           >
-            Download&nbsp;CSV
+            Download CSV
           </button>
         </div>
       </div>
-
-      {/* ────── /controls row ──────────────────────────────────────────── */}
+      {/* ───────── /controls row ──────────────────────────── */}
 
       {/* add form */}
       {showForm && (

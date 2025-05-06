@@ -41,7 +41,8 @@ exports.uploadFace = async (req, res) => {
 exports.registerFingerprint = async (req, res) => {
   try {
     const { studentId, templateId } = req.body;
-    if (templateId == null) return res.status(400).json({ message: "Missing templateId" });
+    if (templateId == null)
+      return res.status(400).json({ message: "Missing templateId" });
 
     const student = await Student.findById(studentId);
     if (!student) return res.status(404).json({ message: "Student not found" });
@@ -59,7 +60,7 @@ exports.registerFingerprint = async (req, res) => {
 exports.getAttendance = async (req, res) => {
   try {
     const records = await Attendance.find({ studentId: req.user.id });
-    const formatted = records.map(r => ({
+    const formatted = records.map((r) => ({
       date: r.date.toISOString().split("T")[0],
       status: r.status,
     }));
@@ -70,10 +71,13 @@ exports.getAttendance = async (req, res) => {
   }
 };
 
-// Get all descriptors (for hardware matching if needed)
+// Get all descriptors (for hardware matching )
 exports.getAllDescriptors = async (req, res) => {
   try {
-    const students = await Student.find({}, "_id name sapId email faceDescriptor fingerprintId");
+    const students = await Student.find(
+      {},
+      "_id name sapId email faceDescriptor fingerprintId"
+    );
     res.json(students);
   } catch (err) {
     console.error(err);
@@ -81,7 +85,7 @@ exports.getAllDescriptors = async (req, res) => {
   }
 };
 
-// Mark attendance (face or fingerprint)
+// Mark attendance (face and fingerprint)
 exports.markAttendance = async (req, res) => {
   try {
     const { studentId, templateId } = req.body;
@@ -95,7 +99,10 @@ exports.markAttendance = async (req, res) => {
 
     if (!student) return res.status(404).json({ message: "Student not found" });
 
-    const record = new Attendance({ studentId: student._id, status: "present" });
+    const record = new Attendance({
+      studentId: student._id,
+      status: "present",
+    });
     await record.save();
 
     // Real-time push via Socket.IO
@@ -131,11 +138,15 @@ exports.updateProfile = async (req, res) => {
     const student = await Student.findById(req.user.id);
     if (!student) return res.status(404).json({ message: "Not found" });
 
-    if (name)  student.name  = name;
+    if (name) student.name = name;
     if (sapId) student.sapId = sapId;
     await student.save();
 
-    res.json({ message: "Profile updated", name: student.name, sapId: student.sapId });
+    res.json({
+      message: "Profile updated",
+      name: student.name,
+      sapId: student.sapId,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });

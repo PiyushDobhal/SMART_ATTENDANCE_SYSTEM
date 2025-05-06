@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-const bcrypt   = require("bcryptjs");
+const bcrypt = require("bcryptjs");
 
 const adminSchema = new mongoose.Schema({
-  email:    String,
+  email: String,
   password: String,
 });
 
@@ -12,5 +12,4 @@ adminSchema.pre("save", async function (next) {
   next();
 });
 
-// Third parameter forces the collection name to exactly "ADMIN"
 module.exports = mongoose.model("Admin", adminSchema, "ADMIN");

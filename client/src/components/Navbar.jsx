@@ -31,6 +31,8 @@ const Navbar = () => {
 
   return (
     <nav className="flex justify-between items-center p-4 bg-gray-800 shadow-lg fixed w-full z-10">
+      <img src="/logo.png" alt="Smart Attendance" className="h-11" />
+
       <h1
         className="text-2xl font-bold text-white cursor-pointer hover:text-gray-300"
         onClick={handleTitleClick}
