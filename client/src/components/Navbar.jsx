@@ -1,4 +1,3 @@
-// client/src/components/Navbar.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 

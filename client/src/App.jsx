@@ -7,20 +7,19 @@ import {
 } from "react-router-dom";
 import io from "socket.io-client";
 
-import Login           from "./pages/Login";
-import AdminDashboard  from "./pages/AdminDashboard";
+import Login from "./pages/Login";
+import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
-import FaceRegister     from "./pages/FaceRegister";
-import Navbar           from "./components/Navbar";
-import Toast            from "./components/Toast";
+import FaceRegister from "./pages/FaceRegister";
+import Navbar from "./components/Navbar";
+import Toast from "./components/Toast";
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-const socket     = io(SOCKET_URL);
+const socket = io(SOCKET_URL);
 
 function App() {
-  // ➊ keep token+role in state so updates trigger a re-render
   const [token, setToken] = useState(localStorage.getItem("token"));
-  const [role, setRole]   = useState(localStorage.getItem("role"));
+  const [role, setRole] = useState(localStorage.getItem("role"));
 
   useEffect(() => {
     socket.on("attendance-updated", (data) => {
@@ -30,7 +29,6 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // ➋ listen for our manual "storage" event to refresh auth state
     const onStorage = () => {
       setToken(localStorage.getItem("token"));
       setRole(localStorage.getItem("role"));
@@ -52,7 +50,10 @@ function App() {
               !token ? (
                 <Login />
               ) : (
-                <Navigate to={role === "admin" ? "/admin" : "/student"} replace />
+                <Navigate
+                  to={role === "admin" ? "/admin" : "/student"}
+                  replace
+                />
               )
             }
           />

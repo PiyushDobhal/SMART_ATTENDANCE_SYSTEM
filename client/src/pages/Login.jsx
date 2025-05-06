@@ -1,37 +1,30 @@
-// client/src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api"; // ensures we hit VITE_API_URL
+import api from "../api";
 
 const Login = () => {
-  const [email, setEmail]       = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole]         = useState("student");
-  const navigate                = useNavigate();
+  const [role, setRole] = useState("student");
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      // 1️⃣ authenticate
-      const endpoint = role === "admin"
-        ? "/api/admin/login"
-        : "/api/students/login";
+      const endpoint =
+        role === "admin" ? "/api/admin/login" : "/api/students/login";
       const res = await api.post(endpoint, { email, password });
 
-      // 2️⃣ store token & role
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", role);
 
-      // 3️⃣ if student, fetch profile now and store name
       if (role === "student") {
         const profileRes = await api.get("/api/students/profile");
         localStorage.setItem("name", profileRes.data.name || "");
       }
 
-      // 4️⃣ let App.jsx & Navbar know about storage change
       window.dispatchEvent(new Event("storage"));
 
-      // 5️⃣ navigate immediately
       if (role === "admin") {
         navigate("/admin", { replace: true });
       } else {

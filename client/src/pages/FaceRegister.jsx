@@ -1,4 +1,3 @@
-// client/src/pages/FaceRegister.jsx
 import React, { useRef, useState, useEffect } from "react";
 import Webcam from "react-webcam";
 import * as faceapi from "face-api.js";
@@ -6,11 +5,11 @@ import api from "../api";
 import { toast } from "react-toastify";
 
 const FaceRegister = () => {
-  const webcamRef    = useRef(null);
+  const webcamRef = useRef(null);
   const [loadingModels, setLoadingModels] = useState(true);
-  const [modelsError, setModelsError]     = useState("");
-  const [showCamera, setShowCamera]       = useState(false);
-  const [status, setStatus]               = useState("");
+  const [modelsError, setModelsError] = useState("");
+  const [showCamera, setShowCamera] = useState(false);
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -46,8 +45,8 @@ const FaceRegister = () => {
     if (!webcamRef.current) return;
 
     const screenshot = webcamRef.current.getScreenshot();
-    const img        = await faceapi.fetchImage(screenshot);
-    const detection  = await faceapi
+    const img = await faceapi.fetchImage(screenshot);
+    const detection = await faceapi
       .detectSingleFace(img)
       .withFaceLandmarks()
       .withFaceDescriptor();

@@ -1,4 +1,3 @@
-// client/src/pages/AdminDashboard.jsx
 import React, { useEffect, useState, useRef } from "react";
 import api from "../api";
 import {
@@ -147,9 +146,7 @@ export default function AdminDashboard({ socket }) {
         </ResponsiveContainer>
       </div>
       {/* ────── controls row ───────────────────────────────────────────── */}
-      <div
-        className="mb-4 grid grid-cols-[auto_1fr_auto] items-center gap-2"
-      >
+      <div className="mb-4 grid grid-cols-[auto_1fr_auto] items-center gap-2">
         {/* left‑hand heading                                                     */}
         <h2 className="text-lg font-semibold whitespace-nowrap">
           Registered&nbsp;Students
