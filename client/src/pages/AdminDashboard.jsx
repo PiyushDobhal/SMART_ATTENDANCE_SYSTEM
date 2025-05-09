@@ -21,6 +21,10 @@ export default function AdminDashboard({ socket }) {
   const [individualStats, setIndividualStats] = useState(null);
   const attendanceRef = useRef(null);
 
+  // ===== NEW: enroll-mode state & toggling =====
+  const [enrolOn, setEnrolOn] = useState(false);
+  const [toggling, setToggling] = useState(false);
+
   // Scroll into view when individualStats changes
   useEffect(() => {
     if (individualStats && attendanceRef.current) {
@@ -42,8 +46,19 @@ export default function AdminDashboard({ socket }) {
     }
   };
 
+  // fetch initial enroll status
+  const fetchEnrollStatus = async () => {
+    try {
+      const res = await api.get("/api/enrol/status");
+      setEnrolOn(res.data.enrolEnabled);
+    } catch {
+      toast.error("Failed to load enroll status");
+    }
+  };
+
   useEffect(() => {
     fetchSummary();
+    fetchEnrollStatus();
     if (socket) {
       socket.on("attendance-updated", fetchSummary);
       return () => socket.off("attendance-updated", fetchSummary);
@@ -147,11 +162,11 @@ export default function AdminDashboard({ socket }) {
       </div>
       {/* ────── controls row ───────────────────────────────────────────── */}
       <div className="mb-4 grid grid-cols-[auto_1fr_auto] items-center gap-2">
-        {/* left‑hand heading                                                     */}
+        {/* left-hand heading */}
         <h2 className="text-lg font-semibold whitespace-nowrap">
           Registered&nbsp;Students
         </h2>
-        {/* right‑hand button group                                               */}
+        {/* right-hand button group */}
         <div className="flex gap-2 flex-nowrap ml-auto">
           {/* add / cancel */}
           <button
@@ -159,19 +174,40 @@ export default function AdminDashboard({ socket }) {
             className="bg-green-600 hover:bg-green-700 text-white
                  px-3 py-1 rounded text-xs sm:text-sm whitespace-nowrap"
           >
-            {showForm ? "Cancel" : "Add Student"}
+            {showForm ? "Cancel" : "Add Student"}
           </button>
 
           {/* enrol toggle */}
           <button
+            disabled={toggling}
             onClick={async () => {
-              const { data } = await api.post("/api/enrol/toggle");
-              toast.info(`Enroll mode ${data.enrolEnabled ? "ON" : "OFF"}`);
+              setToggling(true);
+              try {
+                const { data } = await api.post("/api/enrol/toggle");
+                setEnrolOn(data.enrolEnabled);
+                toast.info(`Enroll mode ${data.enrolEnabled ? "ON" : "OFF"}`);
+              } catch {
+                toast.error("Failed to toggle enroll mode");
+              } finally {
+                setToggling(false);
+              }
             }}
-            className="bg-yellow-600 hover:bg-yellow-700 text-white
-                 px-3 py-1 rounded text-xs sm:text-sm whitespace-nowrap"
+            className={`
+              px-3 py-1 rounded text-xs sm:text-sm whitespace-nowrap
+              ${
+                toggling
+                  ? "bg-yellow-400 cursor-not-allowed text-gray-200"
+                  : enrolOn
+                  ? "bg-red-600 hover:bg-red-700 text-white"
+                  : "bg-green-600 hover:bg-green-700 text-white"
+              }
+            `}
           >
-            Fingerprint Enroll
+            {toggling
+              ? "Toggling…"
+              : enrolOn
+              ? "Disable Enroll"
+              : "Enable Enroll"}
           </button>
 
           {/* CSV */}
@@ -180,7 +216,7 @@ export default function AdminDashboard({ socket }) {
             className="bg-indigo-600 hover:bg-indigo-700 text-white
                  px-3 py-1 rounded text-xs sm:text-sm whitespace-nowrap"
           >
-            Download CSV
+            Download CSV
           </button>
         </div>
       </div>
