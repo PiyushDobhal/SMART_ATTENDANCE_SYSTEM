@@ -201,7 +201,7 @@ const fetchEnrollStatus = async () => {
                   ? "bg-yellow-400 cursor-not-allowed text-gray-200"
                   : enrolOn
                   ? "bg-red-600 hover:bg-red-700 text-white"
-                  : "bg-green-600 hover:bg-green-700 text-white"
+                  : "bg-yellow-600 hover:bg-yellow-700 text-white"
               }
             `}
           >
