@@ -29,17 +29,32 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="flex justify-between items-center p-4 bg-gray-800 shadow-lg fixed w-full z-10">
-      <img src="/logo.png" alt="Smart Attendance" className="h-11" />
+    <nav className="fixed top-0 left-0 right-0 h-16 flex items-center px-4 bg-gray-800 shadow-lg z-10">
+      {/* Logo with right margin */}
+      <img
+        src="/logo.png"
+        alt="Smart Attendance"
+        className="h-8 w-8 mr-2 flex-shrink-0"
+      />
 
+      {/* Title with slight left margin */}
       <h1
-        className="text-2xl font-bold text-white cursor-pointer hover:text-gray-300"
+        className="text-2xl font-bold text-white cursor-pointer hover:text-gray-300 ml-1"
         onClick={handleTitleClick}
       >
         Smart Attendance
       </h1>
+
+      {/* Spacer */}
+      <div className="flex-1" />
+
       <div className="flex items-center space-x-4">
-        {name && <span className="text-gray-200">Welcome, {name}</span>}
+        {/* Truncated name */}
+        {name && (
+          <span className="max-w-xs text-gray-200 truncate">
+            Welcome, {name}
+          </span>
+        )}
         {role && (
           <button
             onClick={logout}
