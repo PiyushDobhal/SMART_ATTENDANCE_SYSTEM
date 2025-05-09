@@ -54,7 +54,6 @@ const StudentDashboard = ({ socket }) => {
     e.preventDefault();
     try {
       await api.put("/api/students/profile", form);
-      // update localStorage and reload to update Navbar
       localStorage.setItem("name", form.name);
       toast.success("Profile updated successfully");
       window.dispatchEvent(new Event("storage"));
@@ -82,13 +81,13 @@ const StudentDashboard = ({ socket }) => {
   ];
 
   return (
-    <div className="p-6 pt-30">
+    <main className="pt-16 p-6">
       {/* Face Registration Prompt */}
       {needsFaceRegister && (
         <div className="mb-6">
           <Link
             to="/student/register-face"
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
+            className="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
           >
             Register Your Face
           </Link>
@@ -123,7 +122,7 @@ const StudentDashboard = ({ socket }) => {
         </div>
         <button
           type="submit"
-          className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition"
+          className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition text-white"
         >
           Save Profile
         </button>
@@ -138,7 +137,7 @@ const StudentDashboard = ({ socket }) => {
             margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
+            <XAxis dataKey="name" />
             <YAxis allowDecimals={false} />
             <Tooltip formatter={(value) => [value, "Count"]} />
             <Bar dataKey="count" fill="#8884d8" />
@@ -148,14 +147,14 @@ const StudentDashboard = ({ socket }) => {
 
       {/* Raw Records */}
       <h2 className="text-lg font-semibold">Records:</h2>
-      <ul className="list-disc ml-6 mt-2">
+      <ul className="list-disc ml-6 mt-2 space-y-1">
         {records.map((r, i) => (
           <li key={i}>
             {r.date}: {r.status}
           </li>
         ))}
       </ul>
-    </div>
+    </main>
   );
 };
 
