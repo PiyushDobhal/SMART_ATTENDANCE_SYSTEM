@@ -47,14 +47,16 @@ export default function AdminDashboard({ socket }) {
   };
 
   // fetch initial enroll status
-  const fetchEnrollStatus = async () => {
-    try {
-      const res = await api.get("/api/enrol/status");
-      setEnrolOn(res.data.enrolEnabled);
-    } catch {
-      toast.error("Failed to load enroll status");
-    }
-  };
+const fetchEnrollStatus = async () => {
+  try {
+    const res = await api.get("/api/enrol/status");
+    setEnrolOn(res.data.enrolEnabled);
+  } catch (err) {
+    console.error("Could not load enroll status:", err);
+    // no toast here
+  }
+};
+
 
   useEffect(() => {
     fetchSummary();
