@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/auth");
-const { faceMatch } = require("../controllers/faceController");
+const { identify} = require("../controllers/faceController");
 
-router.post("/identify", faceMatch);
+router.post("/identify", identify);
 
 module.exports = router;

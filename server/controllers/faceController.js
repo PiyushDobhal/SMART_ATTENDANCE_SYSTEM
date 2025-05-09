@@ -23,8 +23,8 @@ async function loadModels() {
 }
 loadModels().catch((err) => console.error("Model loading error:", err));
 
-// POST /api/face/face-match
-exports.faceMatch = async (req, res) => {
+// POST /api/face/identify
+exports.identify = async (req, res) => {
   try {
     if (!modelsLoaded) {
       return res.status(503).json({ message: "Face models not loaded yet" });

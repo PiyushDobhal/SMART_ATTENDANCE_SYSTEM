@@ -1,32 +1,18 @@
-// controllers/enrolController.js
-
 let enrolEnabled = false;
 const Student = require("../models/Student");
-const Attendance = require("../models/Attendance"); // adjust path as needed
+const Attendance = require("../models/Attendance"); 
 
-/**
- * Toggle enroll mode on/off.
- * POST /api/enrol/toggle
- */
 exports.toggleEnrol = (req, res) => {
   enrolEnabled = !enrolEnabled;
-  // push real‐time update to any WebSocket listeners (e.g. admin UI)
+  // push real‐time update to any WebSocket listeners 
   global._io.emit("enrol-mode", enrolEnabled);
   return res.json({ enrolEnabled });
 };
 
-/**
- * Get current enroll state.
- * GET /api/enrol/status
- */
 exports.getEnrolState = (req, res) => {
   return res.json({ enrolEnabled });
 };
 
-/**
- * Save the fingerprint slot after the Arduino enrolls a finger.
- * PUT /api/enrol/students/:sapId/fingerprint
- */
 exports.setFingerprint = async (req, res) => {
   const { sapId } = req.params;
   const { fingerprintId } = req.body;
@@ -53,13 +39,6 @@ exports.setFingerprint = async (req, res) => {
   });
 };
 
-/**
- * Handle messages from the ESP32/Arduino.
- * POST /api/enrol/from-device
- * Body (text/plain): "ENROL_OK:<sapId>:<slot>" or "FINGER_OK" or "FINGER_BAD"
- */
-// controllers/enrolController.js
-
 exports.handleFromDevice = async (req, res) => {
   const msg = req.body.trim();
 
@@ -80,7 +59,6 @@ exports.handleFromDevice = async (req, res) => {
 
   // --- Fingerprint check success: record attendance ---
   if (msg.startsWith("FINGER_OK:")) {
-    // msg is like "FINGER_OK:5"
     const [, slotStr] = msg.split(":");
     const fingerprintId = parseInt(slotStr, 10);
     if (isNaN(fingerprintId)) {
@@ -96,7 +74,7 @@ exports.handleFromDevice = async (req, res) => {
     // 2) record attendance
     await Attendance.create({
       studentId: stu._id,
-      status: "present",     // your schema’s default is "present"
+      status: "present",     
     });
 
     return res.json({
