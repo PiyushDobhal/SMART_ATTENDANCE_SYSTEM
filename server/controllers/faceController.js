@@ -5,6 +5,7 @@ const tf = require("@tensorflow/tfjs-node");             // native TensorFlow
 const faceapi = require("@vladmandic/face-api");         // optimized face-api for Node
 const { Canvas, Image, ImageData } = require("canvas");
 const path = require("path");
+const fs = require("fs");
 const Student = require("../models/Student");
 
 // Monkey-patch
@@ -13,7 +14,28 @@ faceapi.env.monkeyPatch({ Canvas, Image, ImageData, fetch: global.fetch });
 // Load models once
 let modelsLoaded = false;
 async function loadModels() {
-  const modelPath = path.join(__dirname, "../models"); 
+  const modelPath = path.resolve(__dirname, "../models");
+
+  // Check if model files exist
+  const requiredFiles = [
+    "tiny_face_detector_model-shard1",
+    "tiny_face_detector_model-weights_manifest.json",
+    "ssd_mobilenetv1_model-shard1.bin",
+    "ssd_mobilenetv1_model-weights_manifest.json",
+    "face_landmark_68_model-shard1.bin",
+    "face_landmark_68_model-weights_manifest.json",
+    "face_recognition_model-shard1.bin",
+    "face_recognition_model-shard2.bin",
+    "face_recognition_model-weights_manifest.json"
+  ];
+
+  for (const file of requiredFiles) {
+    const filePath = path.join(modelPath, file);
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`[loadModels] Missing required model file: ${filePath}`);
+    }
+  }
+
   await faceapi.nets.tinyFaceDetector.loadFromDisk(modelPath);
   await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);  // optional fallback
   await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath);
