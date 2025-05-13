@@ -1,8 +1,8 @@
 // server/controllers/faceController.js
 process.env.TFJS_DISABLE_BANNER = "true";
 
-const tf = require("@tensorflow/tfjs-node");             // native TensorFlow
-const faceapi = require("@vladmandic/face-api");         // optimized face-api for Node
+const tf = require("@tensorflow/tfjs-node"); // native TensorFlow
+const faceapi = require("@vladmandic/face-api"); // optimized face-api for Node
 const { Canvas, Image, ImageData } = require("canvas");
 const path = require("path");
 const fs = require("fs");
@@ -27,7 +27,7 @@ async function loadModels() {
     "face_landmark_68_model-weights_manifest.json",
     "face_recognition_model-shard1.bin",
     "face_recognition_model-shard2.bin",
-    "face_recognition_model-weights_manifest.json"
+    "face_recognition_model-weights_manifest.json",
   ];
 
   for (const file of requiredFiles) {
@@ -38,13 +38,15 @@ async function loadModels() {
   }
 
   await faceapi.nets.tinyFaceDetector.loadFromDisk(modelPath);
-  await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);  // optional fallback
+  await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath); // optional fallback
   await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath);
   await faceapi.nets.faceRecognitionNet.loadFromDisk(modelPath);
   modelsLoaded = true;
   console.log("[faceController] models loaded from", modelPath);
 }
-loadModels().catch(err => console.error("[faceController] model load error:", err));
+loadModels().catch((err) =>
+  console.error("[faceController] model load error:", err)
+);
 
 // helper: upscale a canvas
 function upscale(canvas, factor = 2) {
@@ -79,8 +81,8 @@ exports.identify = async (req, res) => {
 
   // 1) tiny face detector pass
   const tinyOpts = new faceapi.TinyFaceDetectorOptions({
-    inputSize: 512,       // try smaller/larger if you want speed/accuracy trade-off
-    scoreThreshold: 0.5
+    inputSize: 640, // try smaller/larger if you want speed/accuracy trade-off
+    scoreThreshold: 0.2,
   });
   let detection = await faceapi
     .detectSingleFace(canvas, tinyOpts)
@@ -100,8 +102,11 @@ exports.identify = async (req, res) => {
   // 3) optional SSD fallback
   if (!detection) {
     console.log("[identify] no tiny face, trying SSDMobilenetV1…");
+    const ssdOpts = new SsdMobilenetv1Options({
+      minConfidence: 0.2, // lower = more detections (and more false positives)
+    });
     detection = await faceapi
-      .detectSingleFace(canvas)
+      .detectSingleFace(canvas, ssdOpts)
       .withFaceLandmarks()
       .withFaceDescriptor();
   }
@@ -115,7 +120,8 @@ exports.identify = async (req, res) => {
   const descriptor = detection.descriptor;
   const students = await Student.find({}, "sapId faceDescriptor fingerprintId");
 
-  let bestMatch = null, minDist = 0.6;
+  let bestMatch = null,
+    minDist = 0.6;
   for (const stu of students) {
     if (!Array.isArray(stu.faceDescriptor) || stu.faceDescriptor.length !== 128)
       continue;
@@ -131,14 +137,13 @@ exports.identify = async (req, res) => {
     return res.json({ recognized: false });
   }
 
-  const slot = typeof bestMatch.fingerprintId === "number"
-    ? bestMatch.fingerprintId
-    : -1;
+  const slot =
+    typeof bestMatch.fingerprintId === "number" ? bestMatch.fingerprintId : -1;
 
   console.log("[identify] matched", bestMatch.sapId, "slot", slot);
   return res.json({
     recognized: true,
     sapId: bestMatch.sapId,
-    fingerprintId: slot
+    fingerprintId: slot,
   });
 };
