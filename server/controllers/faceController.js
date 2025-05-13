@@ -21,6 +21,7 @@ async function loadModels() {
     "tiny_face_detector_model-shard1",
     "tiny_face_detector_model-weights_manifest.json",
     "ssd_mobilenetv1_model-shard1.bin",
+    "ssd_mobilenetv1_model-shard2.bin",
     "ssd_mobilenetv1_model-weights_manifest.json",
     "face_landmark_68_model-shard1.bin",
     "face_landmark_68_model-weights_manifest.json",
