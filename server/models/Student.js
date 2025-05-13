@@ -7,7 +7,7 @@ const studentSchema = new mongoose.Schema({
   faceDescriptor: { type: [Number], default: [] },
   name: { type: String, default: "" },
   sapId: { type: String, default: "" },
-  fingerprintId: { type: Number, default: null },
+  fingerprintId: { type: Number, default: -1 },
 });
 
 // hash on save…
