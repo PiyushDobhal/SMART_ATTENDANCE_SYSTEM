@@ -1,11 +1,6 @@
-// server/controllers/faceController.js
-process.env.TFJS_DISABLE_BANNER = "true";  // optional: silence TFJS startup message
-
-// Load TensorFlow.js Node binding (provides native TensorFlow C++ backend)
-const tf = require("@tensorflow/tfjs-node");
-
-// Load the updated FaceAPI library
-const faceapi = require("@vladmandic/face-api");
+process.env.TFJS_DISABLE_BANNER = "true";
+const tf = require("@tensorflow/tfjs-node");         // ← native binding
+const faceapi = require("@vladmandic/face-api"); 
 
 // Load node-canvas and patch it into face-api environment for image parsing
 const { Canvas, Image, ImageData } = require("canvas");
