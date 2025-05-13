@@ -1,22 +1,26 @@
+// controllers/faceController.js
 process.env.TFJS_DISABLE_BANNER = "true";
-const tf = require("@tensorflow/tfjs-node");         // ← native binding
-const faceapi = require("@vladmandic/face-api"); 
 
-// Load node-canvas and patch it into face-api environment for image parsing
+const tf = require("@tensorflow/tfjs-node");        // native bindings for best performance
+const faceapi = require("@vladmandic/face-api");    // Vlad Mandic’s fork, works nicely in Node.js
 const { Canvas, Image, ImageData } = require("canvas");
+const path = require("path");
+const Student = require("../models/Student");
+
+// — monkey-patch node-canvas + global.fetch into face-api environment
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData, fetch: global.fetch });
 
-// Flag to ensure models are loaded only once
+// — load models once at startup
 let modelsLoaded = false;
 async function loadModels() {
-  const modelPath = require("path").join(__dirname, "../models");
-  // Load face-api models from disk
+  const modelPath = path.join(__dirname, "../models");
   await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
   await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath);
   await faceapi.nets.faceRecognitionNet.loadFromDisk(modelPath);
   modelsLoaded = true;
+  console.log("[faceController] models loaded from", modelPath);
 }
-loadModels().catch(err => console.error("Model loading error:", err));
+loadModels().catch(err => console.error("[faceController] model load error:", err));
 
 /**
  * POST /api/face/identify
@@ -24,46 +28,54 @@ loadModels().catch(err => console.error("Model loading error:", err));
  * Returns: { recognized, sapId?, fingerprintId? }
  */
 exports.identify = async (req, res) => {
+  console.log("[identify] incoming request, image length =", (req.body.image || "").length);
+
   try {
     if (!modelsLoaded) {
+      console.log("[identify] models not ready yet");
       return res.status(503).json({ message: "Face models not loaded yet" });
     }
+
     const { image } = req.body;
     if (typeof image !== "string") {
+      console.log("[identify] bad request: missing image");
       return res.status(400).json({ message: "Missing image (base64 string)" });
     }
 
-    // Strip any "data:image/…;base64," prefix from the base64 string
+    // strip any "data:image/...;base64," prefix
     const b64 = image.replace(/^data:image\/\w+;base64,/, "");
     const imgBuffer = Buffer.from(b64, "base64");
 
-    // Create an Image from the buffer and draw it to a Canvas
+    // draw into canvas
     const img = new Image();
     img.src = imgBuffer;
     const canvas = new Canvas(img.width, img.height);
     const ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0);
 
-    // Perform face detection with landmarks and compute face descriptor
-    const result = await faceapi.detectSingleFace(canvas)
+    // run detection + descriptor
+    const detection = await faceapi
+      .detectSingleFace(canvas)
       .withFaceLandmarks()
       .withFaceDescriptor();
 
-    if (!result) {
-      return res.json({ recognized: false }); // No face found
+    if (!detection) {
+      console.log("[identify] no face detected → returning recognized:false");
+      return res.json({ recognized: false });
     }
-    const queryDescriptor = result.descriptor;
 
-    // Fetch all stored students' face descriptors from DB (sapId, faceDescriptor, fingerprintId)
-    const students = await require("../models/Student").find(
-      {}, "sapId faceDescriptor fingerprintId"
-    );
+    const queryDescriptor = detection.descriptor;
 
-    // Find the best match by Euclidean distance
+    // fetch students from DB
+    const students = await Student.find({}, "sapId faceDescriptor fingerprintId");
+
+    // find best match
     let bestMatch = null;
-    let minDist = 0.6;  // distance threshold
+    let minDist = 0.6;
     for (const stu of students) {
-      if (!Array.isArray(stu.faceDescriptor)) continue;  // skip if no face data
+      if (!Array.isArray(stu.faceDescriptor) || stu.faceDescriptor.length !== 128) {
+        continue;
+      }
       const dist = faceapi.euclideanDistance(queryDescriptor, stu.faceDescriptor);
       if (dist < minDist) {
         minDist = dist;
@@ -72,21 +84,22 @@ exports.identify = async (req, res) => {
     }
 
     if (!bestMatch) {
-      return res.json({ recognized: false }); // no known face matched within threshold
+      console.log("[identify] no known face within threshold → recognized:false");
+      return res.json({ recognized: false });
     }
 
-    // Determine fingerprint slot (if no fingerprint assigned yet, use -1)
-    const slot = (typeof bestMatch.fingerprintId === "number") 
-                   ? bestMatch.fingerprintId 
-                   : -1;
-
-    return res.json({
+    // determine fingerprint slot
+    const slot = typeof bestMatch.fingerprintId === "number" ? bestMatch.fingerprintId : -1;
+    const output = {
       recognized: true,
       sapId: bestMatch.sapId,
-      fingerprintId: slot
-    });
+      fingerprintId: slot,
+    };
+    console.log("[identify] match found →", output);
+    return res.json(output);
+
   } catch (err) {
-    console.error("identify error:", err);
+    console.error("[identify] server error:", err);
     return res.status(500).json({ message: "Server error" });
   }
 };
