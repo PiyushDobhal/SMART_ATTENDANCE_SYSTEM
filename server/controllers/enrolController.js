@@ -5,21 +5,21 @@ const Attendance = require("../models/Attendance");
 let enrolEnabled = false;
 exports.enrolEnabled = () => enrolEnabled;
 
-// (Optional) manually assign a slot
-exports.setFingerprint = async (req, res) => {
-  const { sapId } = req.params;
-  const { fingerprintId } = req.body;
-  if (typeof fingerprintId !== "number") {
-    return res.status(400).json({ message: "fingerprintId must be a number" });
-  }
-  const stu = await Student.findOneAndUpdate(
-    { sapId },
-    { fingerprintId },
-    { new: true }
-  );
-  if (!stu) return res.status(404).json({ message: "Student not found" });
-  return res.json({ message: "Fingerprint slot saved", sapId, fingerprintId });
-};
+// // (Optional) manually assign a slot
+// exports.setFingerprint = async (req, res) => {
+//   const { sapId } = req.params;
+//   const { fingerprintId } = req.body;
+//   if (typeof fingerprintId !== "number") {
+//     return res.status(400).json({ message: "fingerprintId must be a number" });
+//   }
+//   const stu = await Student.findOneAndUpdate(
+//     { sapId },
+//     { fingerprintId },
+//     { new: true }
+//   );
+//   if (!stu) return res.status(404).json({ message: "Student not found" });
+//   return res.json({ message: "Fingerprint slot saved", sapId, fingerprintId });
+// };
 
 // ESP32 POSTs here its Serial replies: ENROL_OK:…, FINGER_OK:… or FINGER_BAD
 exports.handleFromDevice = async (req, res) => {
