@@ -121,7 +121,7 @@ exports.identify = async (req, res) => {
   const students = await Student.find({}, "sapId faceDescriptor fingerprintId");
 
   let bestMatch = null,
-    minDist = 0.6;
+    minDist = 0.9;
   for (const stu of students) {
     if (!Array.isArray(stu.faceDescriptor) || stu.faceDescriptor.length !== 128)
       continue;
