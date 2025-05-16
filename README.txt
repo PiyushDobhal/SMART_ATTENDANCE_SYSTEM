@@ -1,5 +1,3 @@
-# Smart Attendance System (Full Stack)
-
 ## Overview
 This project is a Smart Attendance System integrating hardware and software to mark attendance using fingerprint and optional face recognition.
 
