@@ -137,7 +137,7 @@ A5 (SCL)     ---> SCL
 👨‍💻 **Piyush Dobhal**  
 🎓 B.Tech Electronics and Communication (Final Year)  
 📍 Dehradun, Uttarakhand, India  
-💻 [GitHub Repo](https://github.com/PiyushDobhal/SMART_ATTENDANCE_SYSTEM)  
+💻 [GitHub Repo](https://github.com/PiyushDobhal/SMART-ATTENDANCE-SYSTEM-hardware-)  
 🌐 [Live Site](https://smart-attendance-system-l486.onrender.com)
 
 ---
