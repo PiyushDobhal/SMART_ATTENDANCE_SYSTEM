@@ -1,3 +1,4 @@
+
 # 📚 NoProxy: Smart Attendance System – Full Stack + Hardware Integration
 
 ---
