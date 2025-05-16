@@ -10,7 +10,7 @@ It consists of:
 
 ## Features
 - User registration with face and fingerprint data  
-- Attendance marking via fingerprint (mandatory) and face (optional)  
+- Attendance marking via fingerprint and face (both mandatory)  
 - Real-time syncing of attendance records to the dashboard  
 - Admin dashboard to manage users and view reports  
 - Student dashboard to view attendance history  
