@@ -48,7 +48,7 @@ const FaceRegister = () => {
     if (!webcamRef.current) return;
 
     setIsRegistering(true);
-    const toastId = toast.loading("Registering face, please wait...");
+    // const toastId = toast.loading("Registering face, please wait...");
 
     try {
       const screenshot = webcamRef.current.getScreenshot();
