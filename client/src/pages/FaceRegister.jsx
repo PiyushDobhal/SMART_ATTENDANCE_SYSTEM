@@ -11,7 +11,7 @@ const FaceRegister = () => {
   const [modelsError, setModelsError] = useState("");
   const [showCamera, setShowCamera] = useState(false);
   const [status, setStatus] = useState("");
-  const [isRegistering, setIsRegistering] = useState(false); // new
+  const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -36,7 +36,7 @@ const FaceRegister = () => {
   };
 
   const registerFace = async () => {
-    if (isRegistering) return;                // prevent double clicks
+    if (isRegistering) return;              // guard double-clicks
     if (loadingModels) {
       toast.info("Still loading face models…");
       return;
@@ -48,7 +48,7 @@ const FaceRegister = () => {
     if (!webcamRef.current) return;
 
     setIsRegistering(true);
-    // const toastId = toast.loading("Registering face, please wait...");
+    setStatus("");
 
     try {
       const screenshot = webcamRef.current.getScreenshot();
@@ -60,36 +60,27 @@ const FaceRegister = () => {
 
       if (!detection) {
         setStatus("No face detected. Try again.");
-        toast.update(toastId, {
-          render: "No face detected. Please try again.",
-          type: toast.TYPE.ERROR,
-          isLoading: false,
-          autoClose: 3000,
-        });
+        toast.error("No face detected. Please try again.");
         return;
       }
 
       const descriptor = Array.from(detection.descriptor);
-      await api.post("/api/students/upload-face", { descriptor });
+      const res = await api.post("/api/students/upload-face", { descriptor });
 
-      setStatus("Face registered successfully!");
-      toast.update(toastId, {
-        render: "Face registered successfully! ✅",
-        type: toast.TYPE.SUCCESS,
-        isLoading: false,
-        autoClose: 3000,
-      });
-
-      window.dispatchEvent(new Event("storage"));
-      setTimeout(() => setShowCamera(false), 1000);
+      if (res.data && res.data.success) {
+        setStatus("Face registered successfully!");
+        toast.success("Face registered successfully!");
+        window.dispatchEvent(new Event("storage"));
+        setTimeout(() => setShowCamera(false), 1000);
+      } else {
+        const msg = (res.data && res.data.message) || "Unknown error";
+        setStatus(`Registration failed: ${msg}`);
+        toast.error(`Registration failed: ${msg}`);
+      }
     } catch (err) {
+      console.error(err);
       setStatus("Registration failed");
-      toast.update(toastId, {
-        render: "Failed to register face. Please retry.",
-        type: toast.TYPE.ERROR,
-        isLoading: false,
-        autoClose: 5000,
-      });
+      toast.error("Failed to register face. Please retry.");
     } finally {
       setIsRegistering(false);
     }
@@ -117,6 +108,7 @@ const FaceRegister = () => {
             screenshotFormat="image/jpeg"
             className="rounded shadow-lg mb-4"
           />
+
           <button
             onClick={registerFace}
             disabled={isRegistering}
