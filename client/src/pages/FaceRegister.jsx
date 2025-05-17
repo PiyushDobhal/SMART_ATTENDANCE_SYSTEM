@@ -36,7 +36,7 @@ const FaceRegister = () => {
   };
 
   const registerFace = async () => {
-    if (isRegistering) return;              // guard double-clicks
+    if (isRegistering) return;              // prevent double-clicks
     if (loadingModels) {
       toast.info("Still loading face models…");
       return;
@@ -67,18 +67,22 @@ const FaceRegister = () => {
       const descriptor = Array.from(detection.descriptor);
       const res = await api.post("/api/students/upload-face", { descriptor });
 
+      console.log("API response:", res.data);
+
       if (res.data && res.data.success) {
         setStatus("Face registered successfully!");
         toast.success("Face registered successfully!");
         window.dispatchEvent(new Event("storage"));
         setTimeout(() => setShowCamera(false), 1000);
-      } else {
-        const msg = (res.data && res.data.message) || "Unknown error";
-        setStatus(`Registration failed: ${msg}`);
-        toast.error(`Registration failed: ${msg}`);
+        return;  // <-- prevents falling through to the failure block
       }
+
+      // Only runs if success === false
+      const msg = (res.data && res.data.message) || "Unknown error";
+      setStatus(`Registration failed: ${msg}`);
+      toast.error(`Registration failed: ${msg}`);
     } catch (err) {
-      console.error(err);
+      console.error("Unexpected error during registration:", err);
       setStatus("Registration failed");
       toast.error("Failed to register face. Please retry.");
     } finally {
