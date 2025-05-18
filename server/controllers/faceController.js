@@ -11,6 +11,14 @@ const Student = require("../models/Student");
 // ─── in‐memory lock for each device ───────────────────────────
 const processingDevices = new Set();
 
+// ─── Helper to normalize localhost IPs ──────────────────────
+function getDeviceKey(req) {
+  const ip = req.ip;
+  if (ip === "::1" || ip === "127.0.0.1") return "localhost";
+  return ip;
+}
+
+
 // Monkey-patch canvas + fetch into face-api
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData, fetch: global.fetch });
 
