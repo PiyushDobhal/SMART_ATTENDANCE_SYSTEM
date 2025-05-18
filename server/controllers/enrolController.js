@@ -5,15 +5,23 @@ const Attendance = require("../models/Attendance");
 // import the same Set instance used by faceController
 const { processingDevices } = require("./faceController");
 
+function getDeviceKey(req) {
+  if (req.ip === '::1' || req.ip === '127.0.0.1') {
+    return 'localhost';
+  }
+  return req.ip;
+}
+
+
 // enrolEnabled is always false; ESP only polls for it
 let enrolEnabled = false;
 exports.enrolEnabled = () => enrolEnabled;
 
 // ESP32 POSTs here its Serial replies: ENROL_OK:<sapId>:<slot>, FINGER_OK:<slot> or FINGER_BAD
 exports.handleFromDevice = async (req, res) => {
-  const deviceKey = req.ip;
+  const deviceKey = getDeviceKey(req); 
   const msg = (req.body || "").trim();
-
+  console.log("[handleFromDevice] from", deviceKey, "msg=", req.body);
   // 1) Enrollment success
   if (msg.startsWith("ENROL_OK:")) {
     const [, sapId, slotStr] = msg.split(":");

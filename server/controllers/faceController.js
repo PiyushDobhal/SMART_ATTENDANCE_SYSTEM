@@ -54,7 +54,7 @@ function upscale(canvas, factor = 2) {
 
 // POST /api/face/identify
 exports.identify = async (req, res) => {
-  const deviceKey = req.ip;                             // identify ESP by its IP
+  const deviceKey = getDeviceKey(req);                            // identify ESP by its IP
   console.log("[identify] request from", deviceKey);
 
   // 1) If device is busy, immediately return recognized:false
