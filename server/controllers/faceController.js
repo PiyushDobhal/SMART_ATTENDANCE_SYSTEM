@@ -8,6 +8,9 @@ const path = require("path");
 const fs = require("fs");
 const Student = require("../models/Student");
 
+// ─── in‐memory lock for each device ───────────────────────────
+const processingDevices = new Set();
+
 // Monkey-patch canvas + fetch into face-api
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData, fetch: global.fetch });
 
@@ -15,7 +18,6 @@ faceapi.env.monkeyPatch({ Canvas, Image, ImageData, fetch: global.fetch });
 let modelsLoaded = false;
 async function loadModels() {
   const modelPath = path.resolve(__dirname, "../models");
-
   // sanity-check that we actually have the files
   const required = [
     "tiny_face_detector_model-shard1",
@@ -34,7 +36,6 @@ async function loadModels() {
       throw new Error(`Missing model file: ${path.join(modelPath, f)}`);
     }
   }
-
   await faceapi.nets.tinyFaceDetector.loadFromDisk(modelPath);
   await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
   await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath);
@@ -53,6 +54,15 @@ function upscale(canvas, factor = 2) {
 
 // POST /api/face/identify
 exports.identify = async (req, res) => {
+  const deviceKey = req.ip;                             // identify ESP by its IP
+  console.log("[identify] request from", deviceKey);
+
+  // 1) If device is busy, immediately return recognized:false
+  if (processingDevices.has(deviceKey)) {
+    console.log("[identify] device busy—skipping");
+    return res.json({ recognized: false });
+  }
+
   console.log("[identify] incoming request, image length =", (req.body.image||"").length);
   if (!modelsLoaded) {
     return res.status(503).json({ message: "Face models not loaded yet" });
@@ -72,15 +82,15 @@ exports.identify = async (req, res) => {
 
   // 1) tiny face detector
   const tinyOpts = new faceapi.TinyFaceDetectorOptions({
-    inputSize: 640,     // smaller = faster; increase for more resolution
-    scoreThreshold: 0.05 // lower = more sensitive (↑ false-positives)
+    inputSize: 640,
+    scoreThreshold: 0.05
   });
   let detection = await faceapi
     .detectSingleFace(canvas, tinyOpts)
     .withFaceLandmarks()
     .withFaceDescriptor();
 
-  // 2) if none, upscale & retry
+  // 2) upscale & retry if needed
   if (!detection) {
     console.log("[identify] no tiny face, upscaling & retry");
     const up = upscale(canvas, 2);
@@ -90,12 +100,10 @@ exports.identify = async (req, res) => {
       .withFaceDescriptor();
   }
 
-  // 3) SSD fallback with low threshold
+  // 3) SSD fallback
   if (!detection) {
     console.log("[identify] trying SSDMobilenetV1 fallback");
-    const ssdOpts = new faceapi.SsdMobilenetv1Options({
-      minConfidence: 0.05 // lower = more detections
-    });
+    const ssdOpts = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.05 });
     detection = await faceapi
       .detectSingleFace(canvas, ssdOpts)
       .withFaceLandmarks()
@@ -109,11 +117,10 @@ exports.identify = async (req, res) => {
 
   // compare to DB
   const descriptor = detection.descriptor;
-  const students = await Student.find({}, "sapId faceDescriptor fingerprintId");
-  let best = null, minDist = 0.8;
+  const students  = await Student.find({}, "sapId faceDescriptor fingerprintId");
+  let best = null, minDist = 0.7;
   for (const s of students) {
-    if (!Array.isArray(s.faceDescriptor) || s.faceDescriptor.length !== 128)
-      continue;
+    if (!Array.isArray(s.faceDescriptor) || s.faceDescriptor.length !== 128) continue;
     const d = faceapi.euclideanDistance(descriptor, s.faceDescriptor);
     if (d < minDist) {
       minDist = d;
@@ -126,7 +133,13 @@ exports.identify = async (req, res) => {
     return res.json({ recognized: false });
   }
 
+  // 4) On a true match, lock out this device until feedback arrives
   const slot = typeof best.fingerprintId === "number" ? best.fingerprintId : -1;
   console.log("[identify] matched", best.sapId, "slot", slot);
+  processingDevices.add(deviceKey);
+
   return res.json({ recognized: true, sapId: best.sapId, fingerprintId: slot });
 };
+
+// expose the lock set so other controllers can clear entries
+exports.processingDevices = processingDevices;
