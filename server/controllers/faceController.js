@@ -111,7 +111,7 @@ return res.json({ recognized: false });
 // compare to DB
 const descriptor = detection.descriptor;
 const students = await Student.find({}, "sapId faceDescriptor fingerprintId");
-let best = null, minDist = 0.8;
+let best = null, minDist = 0.9;
 for (const s of students) {
 if (!Array.isArray(s.faceDescriptor) || s.faceDescriptor.length !== 128)
 continue;
